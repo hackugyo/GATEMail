@@ -1,0 +1,32 @@
+.DS_Store
+
+# built application files
+*.apk
+*.ap_
+proguard/*
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# generated files
+bin/
+gen/
+
+# Local configuration file (sdk path, etc)
+local.properties
+#.gitattributes
+libs/*.jar.properties
+
+# Eclipse project files
+.classpath
+# .project
+
+libprojects/*/.settings/
+*.svn-base
+.svn/
+build.xml
+libprojects/actionbar-sherlock/build.xml
+libprojects/actionbar-sherlock/proguard-project.txt
