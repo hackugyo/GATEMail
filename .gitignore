@@ -1,3 +1,4 @@
+
 .DS_Store
 
 # built application files
@@ -17,12 +18,9 @@ gen/
 
 # Local configuration file (sdk path, etc)
 local.properties
+
 #.gitattributes
 libs/*.jar.properties
-
-# Eclipse project files
-.classpath
-# .project
 
 libprojects/*/.settings/
 *.svn-base
@@ -30,3 +28,8 @@ libprojects/*/.settings/
 build.xml
 libprojects/actionbar-sherlock/build.xml
 libprojects/actionbar-sherlock/proguard-project.txt
+
+# Eclipse project files
+.classpath
+.project
+
