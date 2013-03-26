@@ -1,5 +1,8 @@
-package jp.hackugyo.gatemail;
+package jp.hackugyo.gatemail.ui.activity;
 
+import jp.hackugyo.gatemail.R;
+import jp.hackugyo.gatemail.R.layout;
+import jp.hackugyo.gatemail.R.menu;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;

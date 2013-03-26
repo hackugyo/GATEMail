@@ -14,7 +14,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="jp.hackugyo.gatemail.MailMapActivity"
+            android:name="jp.hackugyo.gatemail.ui.activity.MailMapActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
