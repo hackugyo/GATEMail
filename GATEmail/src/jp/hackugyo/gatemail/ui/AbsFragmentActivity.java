@@ -1,5 +1,10 @@
 package jp.hackugyo.gatemail.ui;
 
+import jp.hackugyo.gatemail.exception.CustomUncaughtExceptionHandler;
+import jp.hackugyo.gatemail.ui.activity.AbsWebViewActivity;
+import jp.hackugyo.gatemail.ui.activity.WebViewActivity;
+import jp.hackugyo.gatemail.util.LogUtils;
+import jp.hackugyo.gatemail.util.ViewUtils;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -12,22 +17,13 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.actionbarsherlock.R;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
-import com.flurry.android.FlurryAgent;
-import com.ntt.appondemand.Defines;
-import com.ntt.appondemand.R;
-import com.ntt.appondemand.exception.CustomUncaughtExceptionHandler;
-import com.ntt.appondemand.ui.activity.AbsWebViewActivity;
-import com.ntt.appondemand.ui.activity.WebViewActivity;
-import com.ntt.appondemand.util.AppUtils;
-import com.ntt.appondemand.util.LogUtils;
-import com.ntt.appondemand.util.ViewUtils;
 
 /**
  * すべてのActivityの親となるべきクラスです．<br>
@@ -68,20 +64,11 @@ abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (AppUtils.isDebuggable()) {
-            // LogCat設定
-            FlurryAgent.setLogLevel(Log.DEBUG);
-            FlurryAgent.setLogEnabled(true);
-        }
-        FlurryAgent.setReportLocation(false);
-        FlurryAgent.setCaptureUncaughtExceptions(false);
-        FlurryAgent.onStartSession(this, Defines.MY_FLURRY_API_KEY);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        FlurryAgent.onEndSession(this);
     }
 
     /**
