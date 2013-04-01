@@ -26,10 +26,9 @@ libprojects/*/.settings/
 *.svn-base
 .svn/
 build.xml
-libprojects/actionbar-sherlock/build.xml
-libprojects/actionbar-sherlock/proguard-project.txt
 
 # Eclipse project files
 .classpath
 .project
-
+.settings
+lint.xml
