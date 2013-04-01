@@ -22,8 +22,6 @@ import android.annotation.SuppressLint;
 public final class StringUtils {
     /** 行頭、行末の BR タグにマッチするパターン. */
     private static final Pattern TRIMBRTAG_PATTERN = Pattern.compile("(^<br\\s*[/]*>|<br\\s*[/]*>$)", Pattern.CASE_INSENSITIVE);
-    /** Solr クエリーでエスケープが必要な文字にマッチするパターン. */
-    private static final Pattern SOLR_ESCAPE_PATTERN = Pattern.compile("[¥+\\-¥!¥(¥)¥{¥}\\[\\]¥^~¥*¥?:\"]|&{2}|\\|{2}|[\\\\]", Pattern.UNIX_LINES);
     /** 日時指定フォーマット */
     public static final String DATE_PATTERN = "yyyy/MM/dd HH:mm:ss";
     public static final String DATE_PATTERN_SHORT = "yyyy/MM/dd";
@@ -122,19 +120,6 @@ public final class StringUtils {
             index++;
         }
         return builder.toString();
-    }
-
-    /**
-     * Solrの特殊文字をエスケープして返します.
-     * 
-     * @param str
-     *            クエリー文字列
-     * @return エスケープ後の文字列
-     */
-    public static String escapeSolrQueryString(String str) {
-        if (isEmpty(str)) return null;
-        Matcher m = SOLR_ESCAPE_PATTERN.matcher(str);
-        return m.replaceAll("\\\\$0");
     }
 
     /**

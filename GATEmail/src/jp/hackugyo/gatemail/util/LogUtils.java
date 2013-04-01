@@ -3,7 +3,6 @@ package jp.hackugyo.gatemail.util;
 import jp.hackugyo.gatemail.Defines;
 import android.util.Log;
 
-
 /**
  * Log出力クラス. android:debuggable が false の場合はログを出力しない
  * 基本的に、アプリケーションでのログ出力はこのクラスを使う
@@ -128,7 +127,7 @@ public final class LogUtils {
      */
     public static void v(String tag, CharSequence msg) {
         if (!AppUtils.isDebuggable()) return;
-        // Log.v(tag, getLogForm(Thread.currentThread().getStackTrace()) + msg);
+        Log.v(tag, getLogForm(Thread.currentThread().getStackTrace()) + msg);
     }
 
     /**
@@ -139,7 +138,7 @@ public final class LogUtils {
      */
     public static void v(CharSequence msg) {
         if (!AppUtils.isDebuggable()) return;
-        // Log.v(Defines.LOG_TAG, getLogForm(Thread.currentThread().getStackTrace()) + msg);
+        Log.v(Defines.LOG_TAG, getLogForm(Thread.currentThread().getStackTrace()) + msg);
     }
 
     /**

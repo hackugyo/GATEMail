@@ -1,6 +1,5 @@
 package jp.hackugyo.gatemail;
 
-
 /**
  * 内部で用いるコードなどの定義をまとめた定数クラスです．<br>
  * 実際の値はvalues/defines.xmlに記述しています．<br>
@@ -19,11 +18,10 @@ public class Defines {
     /** 登録済みアプリのJSON化したものをリスト化して保存しておくKEY */
     public static final String SHARED_PREFERENCES_KEY_REGISTERED_APP_LIST = "key_registered_app_list";
 
-
     /****************************************************
      * その他
      ***************************************************/
     /** ログ出力時のデフォルトタグ */
-    public static final String LOG_TAG = "TAG";
+    public static final String LOG_TAG = "GATEMail";
 
 }
