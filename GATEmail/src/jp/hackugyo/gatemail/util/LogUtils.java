@@ -25,7 +25,7 @@ public final class LogUtils {
     }
 
     /**
-     * デバッグログを出力します. タグは {@link Defines#LOG_TAG} になります
+     * デバッグログを出力します. タグは {@link Defines#LOG_TAG}になります
      * 
      * @param msg
      *            デバッグログ
@@ -46,7 +46,7 @@ public final class LogUtils {
     }
 
     /**
-     * エラーログを出力します. タグは {@link Defines#LOG_TAG} になります
+     * エラーログを出力します. タグは {@link Defines#LOG_TAG}になります
      * 
      * @param msg
      *            エラーログ
@@ -56,7 +56,7 @@ public final class LogUtils {
     }
 
     /**
-     * エラーログを出力します. タグは {@link Defines#LOG_TAG} になります
+     * エラーログを出力します. タグは {@link Defines#LOG_TAG}になります
      * 
      * @param tag
      *            タグ
@@ -68,7 +68,7 @@ public final class LogUtils {
     }
 
     /**
-     * エラーログを出力します. タグは {@link Defines#LOG_TAG} になります
+     * エラーログを出力します. タグは {@link Defines#LOG_TAG}になります
      * 
      * @param msg
      *            エラーログ
@@ -80,7 +80,7 @@ public final class LogUtils {
     }
 
     /**
-     * エラーログを出力します. タグは {@link Defines#LOG_TAG} になります
+     * エラーログを出力します. タグは {@link Defines#LOG_TAG}になります
      * 
      * @param tag
      *            タグ
@@ -107,7 +107,7 @@ public final class LogUtils {
     }
 
     /**
-     * ワーニングログを出力します. タグは {@link Defines#LOG_TAG} になります
+     * ワーニングログを出力します. タグは {@link Defines#LOG_TAG}になります
      * 
      * @param msg
      *            ワーニングログ
@@ -131,7 +131,7 @@ public final class LogUtils {
     }
 
     /**
-     * Verboseログを出力します. タグは {@link Defines#LOG_TAG} になります
+     * Verboseログを出力します. タグは {@link Defines#LOG_TAG}になります
      * 
      * @param msg
      *            Verboseログ
