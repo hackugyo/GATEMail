@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import jp.hackugyo.gatemail.ui.view.ImageCacheManager;
-
+import jp.hackugyo.gatemail.util.LogUtils;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
@@ -17,6 +17,11 @@ import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+
+import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 
 public class CustomApplication extends Application {
 
@@ -37,7 +42,7 @@ public class CustomApplication extends Application {
 
         _context = getApplicationContext();
         sImageCacheManager = new ImageCacheManager();
-
+        initImageLoader(getApplicationContext());
     }
 
     /***********************************************
@@ -63,6 +68,23 @@ public class CustomApplication extends Application {
             _sharedPreferences = getAppContext().getSharedPreferences(Defines.SHARED_PREFERENCES, Context.MODE_PRIVATE);
         }
         return _sharedPreferences;
+    }
+    
+    public static void initImageLoader(Context context) {
+        // This configuration tuning is custom. You can tune every option, you may tune some of them, 
+        // or you can create default configuration by
+        //  ImageLoaderConfiguration.createDefault(this);
+        // method.
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
+                .threadPriority(Thread.NORM_PRIORITY - 2)
+                .denyCacheImageMultipleSizesInMemory()
+                .discCacheFileNameGenerator(new Md5FileNameGenerator())
+                .tasksProcessingOrder(QueueProcessingType.LIFO)
+                .enableLogging() // Not necessary in common
+                .build();
+        // Initialize ImageLoader with configuration.
+        ImageLoader.getInstance().init(config);
+        LogUtils.e("inited!");
     }
 
     public static Resources getResource() {

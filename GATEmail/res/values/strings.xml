@@ -3,8 +3,19 @@
 
     <string name="app_name">GATEmail</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
     <string name="Dialog.Button.Label.Positive">OK</string>
     <string name="Dialog.Button.Label.Negative">NG</string>
+    
+    <!-- Activity titles -->
+    <string name="Activity.Name.WebView">内部ブラウザ</string>
+    <string name="Activity.Name.ImageList">Image List Example</string>
+    
+    <!-- MailMapAcitivity -->
+    <string name="Activity.MailMap.Label.ActivityExample">InstaLlPaper</string>
+    <string name="Activity.MailMap.Button.Text.ListViewGallery">ListView</string>
+    
+    <!-- ImageListActivity -->
+    <string name="Image.Description.Default">Image</string>
+    
 
 </resources>

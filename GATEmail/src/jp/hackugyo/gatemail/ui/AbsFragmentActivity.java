@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.R;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 /**
  * すべてのActivityの親となるべきクラスです．<br>
@@ -36,6 +37,8 @@ import com.actionbarsherlock.view.MenuItem;
 abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
     protected FragmentManager mFragmentManager;
     private final AbsFragmentActivity self = this;
+    /** Image Loading Manage */
+    protected ImageLoader mImageLoader = ImageLoader.getInstance();
 
     /***********************************************
      * Life Cycle *
