@@ -6,8 +6,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import jp.hackugyo.gatemail.R;
-import jp.hackugyo.gatemail.ui.AbsFragmentActivity;
 import jp.hackugyo.gatemail.ui.AbsCustomAlertDialogFragment;
+import jp.hackugyo.gatemail.ui.AbsFragmentActivity;
 import jp.hackugyo.gatemail.util.LogUtils;
 import jp.hackugyo.gatemail.util.StringUtils;
 
@@ -31,7 +31,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageButton;
-
 
 /**
  * WebViewの親abstractクラス
@@ -80,6 +79,20 @@ abstract public class AbsWebViewActivity extends AbsFragmentActivity implements 
             // バックグラウンドから復帰させ，onStartが再度呼ばれても，最初のURLを再読み込みしないよう修正
             mWebView.loadUrl(mInitialTargetUrl);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // gifアニメが中にあった場合，停止させる
+        // @see http://starzero.hatenablog.com/entry/20120716/1342421720
+        mWebView.resumeTimers();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mWebView.pauseTimers();
     }
 
     @Override
