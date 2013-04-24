@@ -1,5 +1,6 @@
 package jp.hackugyo.gatemail.util;
 
+import jp.hackugyo.gatemail.BuildConfig;
 import jp.hackugyo.gatemail.CustomApplication;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -20,6 +21,7 @@ public class AppUtils {
             // テスト実行中と見なす．Debuggableとする
             return true;
         }
+        if (BuildConfig.DEBUG) return true;
         ApplicationInfo info = null;
         try {
             info = pm.getApplicationInfo(CustomApplication.getAppContext().getPackageName(), 0);

@@ -1,11 +1,11 @@
 package jp.hackugyo.gatemail;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.regex.Pattern;
 
-import jp.hackugyo.gatemail.ui.view.ImageCacheManager;
-import jp.hackugyo.gatemail.util.LogUtils;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
@@ -30,8 +30,16 @@ public class CustomApplication extends Application {
     private static Context _context;
     /** プリファレンス. */
     private static SharedPreferences _sharedPreferences;
-    /** 画像キャッシュ */
-    private static jp.hackugyo.gatemail.ui.view.ImageCacheManager sImageCacheManager;
+
+    /**
+     * どこにも出力しない PrintStream<br>
+     * {@link Exception#printStackTrace()}などがLogCatに漏れないようにする
+     */
+    private final PrintStream mEmptyStream = new PrintStream(new OutputStream() {
+        public void write(int oneByte) throws IOException {
+            // do nothing
+        }
+    });
 
     /***********************************************
      * Life Cycle *
@@ -41,8 +49,9 @@ public class CustomApplication extends Application {
         super.onCreate();
 
         _context = getApplicationContext();
-        sImageCacheManager = new ImageCacheManager();
         initImageLoader(getApplicationContext());
+
+        createStream();
     }
 
     /***********************************************
@@ -69,22 +78,16 @@ public class CustomApplication extends Application {
         }
         return _sharedPreferences;
     }
-    
+
     public static void initImageLoader(Context context) {
         // This configuration tuning is custom. You can tune every option, you may tune some of them, 
         // or you can create default configuration by
         //  ImageLoaderConfiguration.createDefault(this);
         // method.
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context)
-                .threadPriority(Thread.NORM_PRIORITY - 2)
-                .denyCacheImageMultipleSizesInMemory()
-                .discCacheFileNameGenerator(new Md5FileNameGenerator())
-                .tasksProcessingOrder(QueueProcessingType.LIFO)
-                .enableLogging() // Not necessary in common
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context).threadPriority(Thread.NORM_PRIORITY - 2).denyCacheImageMultipleSizesInMemory().discCacheFileNameGenerator(new Md5FileNameGenerator()).tasksProcessingOrder(QueueProcessingType.LIFO).enableLogging() // Not necessary in common
                 .build();
         // Initialize ImageLoader with configuration.
         ImageLoader.getInstance().init(config);
-        LogUtils.e("inited!");
     }
 
     public static Resources getResource() {
@@ -140,16 +143,6 @@ public class CustomApplication extends Application {
     }
 
     /**
-     * アプリバージョンに対応した，想定しているAPIバージョンを返します．
-     * 
-     */
-    public static String getTargetApiVersion() {
-        String versionName = getAppVersionName();
-        if (versionName == null) return null;
-        return versionName.split(Pattern.quote("."), 2)[0]; // versionNameがx.y...となっていることを期待し，xを取り出す．
-    }
-
-    /**
      * アプリバージョンを返します．
      * 
      */
@@ -164,12 +157,23 @@ public class CustomApplication extends Application {
     }
 
     /**
-     * アプリ全体で利用する画像キャッシュを返します．
-     * この画像キャッシュはアプリアイコンだけを保存する想定のため，キーは，アプリのsearchKeyとします．
+     * スタックトレースがリリース後にLogCatに流出しないよう，出力先をハンドリングします．
      * 
-     * @return 画像キャッシュ（不変インスタンス）
+     * @see <a href="http://www.jssec.org/dl/android_securecoding.pdf">参考ページ</a>
      */
-    public static ImageCacheManager getImageCacheManager() {
-        return sImageCacheManager;
+    private void createStream() {
+        // System.out/err の本来のストリームを退避する
+        PrintStream savedOut = System.out;
+        PrintStream savedErr = System.err;
+        // 一旦、System.out/err をどこにも出力しない PrintStream にリダイレクトする
+        System.setOut(mEmptyStream);
+        System.setErr(mEmptyStream);
+        // デバッグ時のみ本来のストリームに戻す(リリースビルドでは下記 1行が無視される)
+        if (BuildConfig.DEBUG) resetStreams(savedOut, savedErr);
+    }
+
+    private void resetStreams(PrintStream savedOut, PrintStream savedErr) {
+        System.setOut(savedOut);
+        System.setErr(savedErr);
     }
 }

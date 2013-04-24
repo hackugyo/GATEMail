@@ -8,24 +8,28 @@ import java.util.TimerTask;
 import jp.hackugyo.gatemail.R;
 import jp.hackugyo.gatemail.ui.AbsCustomAlertDialogFragment;
 import jp.hackugyo.gatemail.ui.AbsFragmentActivity;
+import jp.hackugyo.gatemail.ui.fragment.PlainAlertDialogFragment;
 import jp.hackugyo.gatemail.util.LogUtils;
 import jp.hackugyo.gatemail.util.StringUtils;
 
 import org.apache.http.protocol.HTTP;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.net.http.SslCertificate;
+import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.view.ViewConfiguration;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.GeolocationPermissions.Callback;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -123,7 +127,6 @@ abstract public class AbsWebViewActivity extends AbsFragmentActivity implements 
      * View *
      ***********************************************/
 
-    @SuppressLint("SetJavaScriptEnabled")
     protected void setWebView() {
 
         mWebView = (WebView) findViewById(R.id.webview);
@@ -133,7 +136,7 @@ abstract public class AbsWebViewActivity extends AbsFragmentActivity implements 
 
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setGeolocationEnabled(true);
-        webSettings.setJavaScriptEnabled(true);
+        webSettings.setJavaScriptEnabled(false);
         webSettings.setSaveFormData(false);
         webSettings.setSavePassword(false);
         webSettings.setSupportZoom(true);
@@ -174,7 +177,7 @@ abstract public class AbsWebViewActivity extends AbsFragmentActivity implements 
      * カスタムwebViewClient 読み込み進捗のプログレスダイアログを表示します． メールリンク・電話番号リンクを正しくハンドリングします．
      * 
      */
-    private final WebViewClient mWebViewClient = new WebViewClientWithCookie() {
+    private final WebViewClient mWebViewClient = new WebViewUnlimitedClient() {
         private boolean mIsLoadingFinished = true;
         private boolean mIsRedirected = false;
 
@@ -324,7 +327,7 @@ abstract public class AbsWebViewActivity extends AbsFragmentActivity implements 
         /** フラグメントのファクトリーメソッド． */
         public static BackAlertDialogFragment newInstance() {
             BackAlertDialogFragment fragment = new BackAlertDialogFragment();
-            Bundle args = initializeSettings(null, null, "前の画面に戻りますか？（仮）", null);
+            Bundle args = initializeSettings(null, null, "前の画面に戻りますか？", null);
             args.putBoolean(IS_CANCELABLE, true);
             fragment.setArguments(args);
             return fragment;
@@ -364,24 +367,66 @@ abstract public class AbsWebViewActivity extends AbsFragmentActivity implements 
     }
 
     /***********************************************
-     * private method *
+     * {@link WebViewClient} *
      **********************************************/
-    public abstract class WebViewClientWithCookie extends WebViewClient {
+    public abstract class WebViewClientWithCookie extends WebViewUnlimitedClient {
 
-        //  private String mLoginCookie = "";
+        private String mLoginCookie = "";
 
         @Override
         public void onLoadResource(WebView view, String url) {
-            // CookieManager cMgr = CookieManager.getInstance();
-            // mLoginCookie = cMgr.getCookie(url);
+            CookieManager cMgr = CookieManager.getInstance();
+            mLoginCookie = cMgr.getCookie(url);
         }
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            // CookieManager cMgr = CookieManager.getInstance();
-            // cMgr.setCookie(url, mLoginCookie);
-            // LogUtils.v("onPageFinished: " + url + " / cookie: " + (mLoginCookie == null ? "no cookie." : mLoginCookie.toString()));
+            CookieManager cMgr = CookieManager.getInstance();
+            cMgr.setCookie(url, mLoginCookie);
+            LogUtils.v("onPageFinished: " + url + " / cookie: " + (mLoginCookie == null ? "no cookie." : mLoginCookie.toString()));
             LogUtils.v(new StringBuilder("onPageFinished: ").append(url).append(" : ").append(CookieManager.getInstance().getCookie(url)).toString());
+        }
+    }
+
+    public abstract class WebViewUnlimitedClient extends WebViewClient {
+
+        /**
+         * SSL通信で問題があるとエラーダイアログを表示し、接続を中止する
+         */
+        @Override
+        public void onReceivedSslError(WebView webview, SslErrorHandler handler, SslError error) {
+            showSslErrorDialog(error);
+            handler.cancel();
+        }
+    }
+
+    /***********************************************
+     * private method *
+     **********************************************/
+    private void showSslErrorDialog(SslError error) {
+        DialogFragment fragment = PlainAlertDialogFragment.newInstance("SSL接続エラー", createErrorMessage(error));
+        showDialogFragment(fragment, "tag_ssl_error_alert_dialog");
+    }
+
+    private String createErrorMessage(SslError error) {
+        SslCertificate cert = error.getCertificate();
+        StringBuilder result = new StringBuilder().append("サイトのセキュリティ証明書が信頼できません。接続を終了しました。\n\nエラーの原因\n");
+        switch (error.getPrimaryError()) {
+            case SslError.SSL_EXPIRED:
+                result.append("証明書の有効期限が切れています。\n\n終了時刻=").append(cert.getValidNotAfterDate());
+                return result.toString();
+            case SslError.SSL_IDMISMATCH:
+                result.append("ホスト名が一致しません。\n\nCN=").append(cert.getIssuedTo().getCName());
+                return result.toString();
+            case SslError.SSL_NOTYETVALID:
+                result.append("証明書はまだ有効ではありません\n\n開始時刻=").append(cert.getValidNotBeforeDate());
+                return result.toString();
+            case SslError.SSL_UNTRUSTED:
+                result.append("証明書を発行した認証局が信頼できません\n\n認証局\n").append(cert.getIssuedBy().getDName());
+                return result.toString();
+            default:
+                result.append("原因不明のエラーが発生しました");
+                return result.toString();
         }
     }
 

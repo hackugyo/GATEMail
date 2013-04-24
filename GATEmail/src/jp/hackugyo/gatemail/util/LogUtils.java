@@ -1,5 +1,6 @@
 package jp.hackugyo.gatemail.util;
 
+import jp.hackugyo.gatemail.BuildConfig;
 import jp.hackugyo.gatemail.Defines;
 import android.util.Log;
 
@@ -12,7 +13,8 @@ import android.util.Log;
 public final class LogUtils {
 
     /**
-     * タグを指定してデバッグログを出力します.
+     * タグを指定してデバッグログを出力します.<br>
+     * 文字列の組み立て処理を行う場合，その部分も含めて{@link BuildConfig#DEBUG}を条件にして囲ってください．
      * 
      * @param tag
      *            タグ
@@ -25,7 +27,8 @@ public final class LogUtils {
     }
 
     /**
-     * デバッグログを出力します. タグは {@link Defines#LOG_TAG}になります
+     * デバッグログを出力します. タグは {@link Defines#LOG_TAG}になります<br>
+     * 文字列の組み立て処理を行う場合，その部分も含めて{@link BuildConfig#DEBUG}を条件にして囲ってください．
      * 
      * @param msg
      *            デバッグログ
@@ -118,7 +121,8 @@ public final class LogUtils {
     }
 
     /**
-     * タグを指定してVerboseログを出力します.
+     * タグを指定してVerboseログを出力します.<br>
+     * 文字列の組み立て処理を行う場合，その部分も含めて{@link BuildConfig#DEBUG}を条件にして囲ってください．
      * 
      * @param tag
      *            タグ
@@ -131,7 +135,8 @@ public final class LogUtils {
     }
 
     /**
-     * Verboseログを出力します. タグは {@link Defines#LOG_TAG}になります
+     * Verboseログを出力します. タグは {@link Defines#LOG_TAG}になります<br>
+     * 文字列の組み立て処理を行う場合，その部分も含めて{@link BuildConfig#DEBUG}を条件にして囲ってください．
      * 
      * @param msg
      *            Verboseログ
