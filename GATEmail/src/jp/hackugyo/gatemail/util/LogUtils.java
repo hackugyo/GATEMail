@@ -1,6 +1,5 @@
 package jp.hackugyo.gatemail.util;
 
-import jp.hackugyo.gatemail.BuildConfig;
 import jp.hackugyo.gatemail.Defines;
 import android.util.Log;
 
@@ -13,8 +12,7 @@ import android.util.Log;
 public final class LogUtils {
 
     /**
-     * タグを指定してデバッグログを出力します.<br>
-     * 文字列の組み立て処理を行う場合，その部分も含めて{@link BuildConfig#DEBUG}を条件にして囲ってください．
+     * タグを指定してデバッグログを出力します.
      * 
      * @param tag
      *            タグ
@@ -27,8 +25,7 @@ public final class LogUtils {
     }
 
     /**
-     * デバッグログを出力します. タグは {@link Defines#LOG_TAG}になります<br>
-     * 文字列の組み立て処理を行う場合，その部分も含めて{@link BuildConfig#DEBUG}を条件にして囲ってください．
+     * デバッグログを出力します. タグは SMBCDirect になります
      * 
      * @param msg
      *            デバッグログ
@@ -43,13 +40,8 @@ public final class LogUtils {
         Log.i(Defines.LOG_TAG, getLogForm(Thread.currentThread().getStackTrace()) + msg);
     }
 
-    public static void i(String tag, CharSequence msg) {
-        if (!AppUtils.isDebuggable()) return;
-        Log.i(tag, getLogForm(Thread.currentThread().getStackTrace()) + msg);
-    }
-
     /**
-     * エラーログを出力します. タグは {@link Defines#LOG_TAG}になります
+     * エラーログを出力します. タグは SMBCDirect になります
      * 
      * @param msg
      *            エラーログ
@@ -59,7 +51,7 @@ public final class LogUtils {
     }
 
     /**
-     * エラーログを出力します. タグは {@link Defines#LOG_TAG}になります
+     * エラーログを出力します. タグは SMBCDirect になります
      * 
      * @param tag
      *            タグ
@@ -71,7 +63,7 @@ public final class LogUtils {
     }
 
     /**
-     * エラーログを出力します. タグは {@link Defines#LOG_TAG}になります
+     * エラーログを出力します. タグは SMBCDirect になります
      * 
      * @param msg
      *            エラーログ
@@ -83,7 +75,7 @@ public final class LogUtils {
     }
 
     /**
-     * エラーログを出力します. タグは {@link Defines#LOG_TAG}になります
+     * エラーログを出力します. タグは SMBCDirect になります
      * 
      * @param tag
      *            タグ
@@ -110,7 +102,7 @@ public final class LogUtils {
     }
 
     /**
-     * ワーニングログを出力します. タグは {@link Defines#LOG_TAG}になります
+     * ワーニングログを出力します. タグは SMBCDirect になります
      * 
      * @param msg
      *            ワーニングログ
@@ -121,8 +113,7 @@ public final class LogUtils {
     }
 
     /**
-     * タグを指定してVerboseログを出力します.<br>
-     * 文字列の組み立て処理を行う場合，その部分も含めて{@link BuildConfig#DEBUG}を条件にして囲ってください．
+     * タグを指定してVerboseログを出力します.
      * 
      * @param tag
      *            タグ
@@ -135,8 +126,7 @@ public final class LogUtils {
     }
 
     /**
-     * Verboseログを出力します. タグは {@link Defines#LOG_TAG}になります<br>
-     * 文字列の組み立て処理を行う場合，その部分も含めて{@link BuildConfig#DEBUG}を条件にして囲ってください．
+     * Verboseログを出力します. タグは SMBCDirect になります
      * 
      * @param msg
      *            Verboseログ
@@ -156,9 +146,11 @@ public final class LogUtils {
     private static String getLogForm(StackTraceElement[] elements) {
         StringBuilder sb = new StringBuilder();
         try {
+
             String file = elements[3].getFileName();
             String method = elements[3].getMethodName();
             int line = elements[3].getLineNumber();
+
             sb.append(StringUtils.ellipsizeMiddle(file.replace(".java", ""), 25, true));
             sb.append("#").append(StringUtils.ellipsize(method, 18, true));
             sb.append("() [").append(String.format("%1$04d", line)).append("] : ");

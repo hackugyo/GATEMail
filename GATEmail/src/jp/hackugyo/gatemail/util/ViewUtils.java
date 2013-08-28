@@ -2,12 +2,15 @@ package jp.hackugyo.gatemail.util;
 
 import java.lang.reflect.Method;
 
+import jp.hackugyo.gatemail.CustomApplication;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.NinePatchDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -20,6 +23,70 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 
 public class ViewUtils {
+
+    /**
+     * dipsからpxの値に変更します。
+     * 
+     * @param dip
+     * @return pxに変換した値
+     */
+    public static int dipsToPixel(int dip) {
+        float scale = CustomApplication.getAppContext().getResources().getDisplayMetrics().density;
+        return (int) (dip * scale);
+    }
+
+    /**
+     * {@link Activity#setContentView(int)}したViewを取得します．
+     * 
+     */
+    public static View getContentView(Activity activity) {
+        return ((ViewGroup) activity.findViewById(android.R.id.content)).getChildAt(0);
+    }
+
+    /***********************************************
+     * idからViewに設定 *
+     **********************************************/
+
+    /**
+     * ViewにOnClickListenerを設定します．
+     * 
+     * @param rootView
+     * @param viewId
+     * @param listener
+     * @return View or null
+     */
+    public static View setOnClickListener(View rootView, int viewId, View.OnClickListener listener) {
+        View v = rootView.findViewById(viewId);
+        if (v != null) v.setOnClickListener(listener);
+        return v;
+    }
+
+    /**
+     * ViewにOnClickListenerを設定します．
+     * 
+     * @param activity
+     * @param viewId
+     * @param listener
+     * @return View or null
+     */
+    public static View setOnClickListener(Activity activity, int viewId, View.OnClickListener listener) {
+        View v = activity.findViewById(viewId);
+        if (v != null) v.setOnClickListener(listener);
+        return v;
+    }
+
+    /**
+     * ViewにVisibility:GONEを設定します．
+     * 
+     * @param rootView
+     * @param viewIds
+     */
+    public static void setVisibilityGone(View rootView, int... viewIds) {
+        for (int viewId : viewIds) {
+            View v = rootView.findViewById(viewId);
+            if (v != null) v.setVisibility(View.GONE);
+        }
+    }
 
     /***********************************************
      * Viewサイズ設定 *
@@ -38,9 +105,17 @@ public class ViewUtils {
     public static void setLayoutParams(View view, Integer w, Integer h) {
         if (view == null) return;
         ViewGroup.LayoutParams params = view.getLayoutParams();
-        if (w != null) params.width = w;
-        if (h != null) params.height = h;
-        view.setLayoutParams(params);
+        if (params != null) {
+            if (w != null) params.width = w;
+            if (h != null) params.height = h;
+        } else {
+            params = new ViewGroup.LayoutParams(w, h);
+        }
+        try {
+            view.setLayoutParams(params);
+        } catch (ClassCastException e) {
+            LogUtils.e("cannot set LayoutParams." + e.toString());
+        }
     }
 
     /***********************************************
@@ -116,7 +191,18 @@ public class ViewUtils {
      * @param drawable
      * @return 第1引数のView
      */
-    @SuppressWarnings("javadoc")
+    public static View setBackgroundDrawable(View view, int drawableId) {
+        return setBackgroundDrawable(view, CustomApplication.getDrawableById(drawableId));
+    }
+
+    /**
+     * {@link View#setBackgroundDrawable(Drawable)}
+     * がdeprecatedになったので，SDK_INTによって処理を変えます．
+     * 
+     * @param view
+     * @param drawable
+     * @return 第1引数のView
+     */
     public static View setBackgroundDrawable(View view, Drawable drawable) {
         if (drawable == null) {
             view.setBackgroundResource(0);
@@ -224,30 +310,46 @@ public class ViewUtils {
         }
     }
 
+    public static void recycleImageView(ImageView view) {
+        Drawable toRecycle = view.getDrawable();
+        recycleDrawable(toRecycle);
+        view.setImageBitmap(null);
+    }
+
     /**
      * {@link Drawable}をrecycleします．<br>
      * これを使ったら，利用しているViewに対して直後に{@link #cleanupViewWithImage(View)}を呼んでください．<br>
      * 同じbitmapを使っているdrawableが複数存在する場合があるので，注意して呼び出してください．<br>
      * 
-     * @param drawable
+     * @param toRecycle
      */
-    public static void recycleDrawable(Drawable drawable) {
-        if (drawable == null) return;
-        if (!(drawable instanceof BitmapDrawable)) return;
-        BitmapDrawable bd = (BitmapDrawable) drawable;
-        Bitmap bitmap = bd.getBitmap();
-        if (bitmap != null) bitmap.recycle();
+    public static void recycleDrawable(Drawable toRecycle) {
+        Bitmap image = getBitmapFrom(toRecycle);
+        if (image != null) image.recycle();
     }
 
-    /***********************************************
-     * レイアウト *
-     **********************************************/
     /**
-     * setContentView(id)したViewを取得します．
+     * drawableからBitmapを取得します．drawableは{@link BitmapDrawable}とは限らないので，<br>
+     * このメソッド経由で取得してください．
      * 
+     * @param drawable
+     * @return bitmap or null
      */
-    public static View getContentView(Activity activity) {
-        return ((ViewGroup) activity.findViewById(android.R.id.content)).getChildAt(0);
+    public static Bitmap getBitmapFrom(Drawable drawable) {
+        if (drawable == null) return null;
+        Bitmap image = null;
+        if (drawable instanceof StateListDrawable) {
+            // StateListViewに設定されているdrawableが画像であることを前提にしている
+            // そうでない場合失敗するので再帰
+            image = getBitmapFrom(((StateListDrawable) drawable).getCurrent());
+        } else if (drawable instanceof BitmapDrawable) {
+            image = ((BitmapDrawable) drawable).getBitmap();
+        } else if (drawable instanceof NinePatchDrawable) {
+            LogUtils.v("I am an NinePathcDrawable. Nothing to do to fit width.");
+        } else {
+            LogUtils.v("I am an " + drawable.getClass().getCanonicalName() + ". Nothing to do to fit width.");
+        }
+        return image;
     }
 
     /***********************************************

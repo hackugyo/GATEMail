@@ -1,8 +1,10 @@
 package jp.hackugyo.gatemail.ui;
 
+import jp.hackugyo.gatemail.R;
 import jp.hackugyo.gatemail.exception.CustomUncaughtExceptionHandler;
 import jp.hackugyo.gatemail.ui.activity.AbsWebViewActivity;
 import jp.hackugyo.gatemail.ui.activity.WebViewActivity;
+import jp.hackugyo.gatemail.util.FragmentUtils;
 import jp.hackugyo.gatemail.util.LogUtils;
 import jp.hackugyo.gatemail.util.ViewUtils;
 import android.app.Dialog;
@@ -10,6 +12,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,26 +20,16 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.actionbarsherlock.R;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.MenuItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
-/**
- * すべてのActivityの親となるべきクラスです．<br>
- * Fragmentに関連するメソッドは，正しく呼び出さないと問題が起きる場合があるので，<br>
- * このクラスの実装経由で利用することを推奨します．<br>
- * 
- * @author kwatanabe
- * 
- */
 abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
-    protected FragmentManager mFragmentManager;
     private final AbsFragmentActivity self = this;
+    protected FragmentManager mFragmentManager;
     /** Image Loading Manage */
     protected ImageLoader mImageLoader = ImageLoader.getInstance();
 
@@ -53,25 +46,16 @@ abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
         customUncaughtExceptionHandler = new CustomUncaughtExceptionHandler(getApplicationContext());
         Thread.setDefaultUncaughtExceptionHandler(customUncaughtExceptionHandler);
 
-        // FragmentManagerを確保
         mFragmentManager = getSupportFragmentManager();
-
         // OSにキャプチャされないようにする．2.3を超えたやつに対してのみ適用
         // http://y-anz-m.blogspot.jp/2012/05/android_05.html
-        // if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD_MR1) {
+            // getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        }
 
-        // ホームボタンを有効にする．
+        // ActionBarのホームボタンを有効にする．
         getSupportActionBar().setHomeButtonEnabled(true);
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
     }
 
     /**
@@ -107,16 +91,15 @@ abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
             return false;
         }
         Fragment prev = mFragmentManager.findFragmentByTag(fragmentTag);
-        if (prev == null) {
-            LogUtils.v("  not found: " + fragmentTag);
-            return false;
-        }
-        LogUtils.v("  found: " + fragmentTag);
+        if (prev == null) return false;
 
         if (prev instanceof DialogFragment) {
             final Dialog dialog = ((DialogFragment) prev).getDialog();
 
             if (dialog != null && dialog.isShowing()) {
+                // 最新のソースだと，dialogそのものをdismissする前にフラグを見て抜けてしまうので，
+                // dialog自体は別途dismiss()してやるのが確実．
+                dialog.dismiss(); // http://blog.zaq.ne.jp/oboe2uran/article/876/
                 // prev.dismiss()を呼んではだめ． http://memory.empressia.jp/article/44110106.html
                 ((DialogFragment) prev).onDismiss(dialog); // DialogFragmentの場合は閉じる処理も追加
             }
@@ -132,17 +115,7 @@ abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
     }
 
     protected boolean isShowingSameDialogFragment(String fragmentTag) {
-
-        Fragment prev = mFragmentManager.findFragmentByTag(fragmentTag);
-        if (prev == null) return false;
-
-        if (prev instanceof DialogFragment) {
-            final Dialog dialog = ((DialogFragment) prev).getDialog();
-            if (dialog != null && dialog.isShowing()) {
-                return true;
-            }
-        }
-        return false;
+        return FragmentUtils.isShowingSameDialogFragment(mFragmentManager, fragmentTag);
     }
 
     /**
@@ -157,16 +130,24 @@ abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
             public void run() {
                 removeFragment(tag);
                 if (mFragmentManager == null) mFragmentManager = getSupportFragmentManager();
+                if (mFragmentManager == null) return;
                 try {
                     fragment.show(mFragmentManager, tag);
-                } catch (NullPointerException e) {
-                    LogUtils.e(tag + ": cannot get SupportFragmentManager.");
-                    LogUtils.e(self.getClass().getSimpleName() + e.getMessage());
                 } catch (IllegalStateException e) {
                     LogUtils.e(tag + ": cannot show a dialog when this activity is in background.");
                     LogUtils.e(self.getClass().getSimpleName() + e.getMessage());
+                    // 表示のタイミングでバックグラウンドにいた場合など，
+                    // show()だとIllegalStateExceptionで落ちてしまう
+                    // http://stackoverflow.com/a/16206036/2338047
+                    // ただし，show()を使わないと内部的なフラグが動かないので，
+                    // まずshow()を使ってフラグを立て，
+                    // 失敗したときのみFragmet#commit()のかわりにFragment#commitAllowingStateLoss()を呼ぶ．
+                    removeFragment(tag);
+                    FragmentTransaction ft = mFragmentManager.beginTransaction();
+                    ft.add(fragment, tag);
+                    ft.commitAllowingStateLoss();
+                    mFragmentManager.executePendingTransactions();
                 }
-                LogUtils.v("  no fragment of " + tag + " ? " + (mFragmentManager.findFragmentByTag(tag) == null));
             }
         });
     }
@@ -175,26 +156,13 @@ abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
      * intent handling *
      **********************************************/
 
-    /**
-     * 外部ブラウザを選択させて表示します．<br>
-     * Andorid4.0以降，外部ブラウザが端末にインストールされていない場合があるため，<br>
-     * このメソッドを利用することを推奨します．<br>
-     * 
-     * @param url
-     */
     public void launchExternalBrowser(String url) {
+        // launchBrowser(url, true);
         selectBrowser(url);
     }
 
-    protected void launchWebView(String url) {
-        Intent i = new Intent(self, WebViewActivity.class).putExtra(AbsWebViewActivity.TARGET_URL_KEY, url).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(i);
-    }
-
-    /***********************************************
-     * ブラウザ起動*
-     ***********************************************/
     protected static final int REQUEST_PICK_BROWSER = 0x1111;
+    protected static final int REQUEST_PICK_BROWSER_TO_DOWNLOAD_THIS_APP = 0x1112; // TODO あとで適切な場所に移動し一覧化する
 
     /**
      * urlを処理できるアプリ（ブラウザアプリ）の一覧を表示するchooserを出します．
@@ -220,12 +188,25 @@ abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
         }
     }
 
+    /**
+     * 内部WebViewで表示するためのインテントを取得します． デフォルトでは，{@link WebViewActivity}を使います．
+     * {@link Intent#FLAG_ACTIVITY_CLEAR_TOP}や
+     * {@link Intent#FLAG_ACTIVITY_SINGLE_TOP}などのフラグは未設定なので，呼び出し時に付加してください．
+     * 
+     * @param url
+     */
+    public Intent getInternalWebViewIntent(String url) {
+        Intent i = new Intent(self, WebViewActivity.class).putExtra(AbsWebViewActivity.TARGET_URL_KEY, url);
+        return i;
+    }
+
     /***********************************************
      * Activity Result Handling *
      **********************************************/
     /**
-     * アプリケーション（このactivityインスタンスを含んだタスク）全体をbackgroundに入れます．
-     * 4.1(JellyBean)APIのfinishAffinity()の代わりです．
+     * アプリケーション（このactivityインスタンスを含んだタスク）全体をbackgroundに入れる
+     * 4.1(JellyBean)APIのfinishAffinity()は全体をfinishさせますが，<br>
+     * これはfinishはしません．<br>
      */
     protected void finishApplication() {
         moveTaskToBack(true);
@@ -237,6 +218,11 @@ abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
             if (fromToDataIntent == null) return;
             fromToDataIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(fromToDataIntent);
+        } else if (isSameRequestCode(requestCode, REQUEST_PICK_BROWSER_TO_DOWNLOAD_THIS_APP)) {
+            if (fromToDataIntent == null) return;
+            fromToDataIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(fromToDataIntent);
+            finishApplication();
         } else {
             super.onActivityResult(requestCode, resultCode, fromToDataIntent);
         }
@@ -245,8 +231,8 @@ abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
     /**
      * {@link AbsFragmentActivity#onActivityResult(int, int, Intent)}
      * において，requestCodeが指定のものと同じかどうか判定します．
-     * FragmentからstartActivityForResult()した場合， <br>
-     * support packageを使う際は，requestCodeの下位16bitを除いて比較する必要があるため，このメソッドを使う必要があります．
+     * FragmentからstartActivityForResult()した場合， support
+     * packageを使う際は，requestCodeの下位16bitを除いて比較する必要があるため，このメソッドを使う必要があります．
      * 
      * @see <a
      *      href="http://y-anz-m.blogspot.jp/2012/05/support-package-fragment.html">http://y-anz-m.blogspot.jp/2012/05/support-package-fragment.html</a>
@@ -268,26 +254,7 @@ abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
      * 
      */
     public View getContentView() {
-        return ((ViewGroup) findViewById(android.R.id.content)).getChildAt(0);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                return onHomeIconPressed(item);
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    /**
-     * ホームアイコン押下時の動作．
-     */
-    protected boolean onHomeIconPressed(MenuItem item) {
-        finish();
-        return true;
+        return ViewUtils.getContentView(self);
     }
 
     /***********************************************
@@ -304,7 +271,7 @@ abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
             case Configuration.ORIENTATION_LANDSCAPE:
                 return true;
             case Configuration.ORIENTATION_PORTRAIT:
-                // case Configuration.ORIENTATION_SQUARE:
+            case Configuration.ORIENTATION_SQUARE:
             case Configuration.ORIENTATION_UNDEFINED:
             default:
                 return false;
@@ -321,7 +288,7 @@ abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
             case Configuration.ORIENTATION_PORTRAIT:
                 return true;
             case Configuration.ORIENTATION_LANDSCAPE:
-                // case Configuration.ORIENTATION_SQUARE:
+            case Configuration.ORIENTATION_SQUARE:
             case Configuration.ORIENTATION_UNDEFINED:
             default:
                 return false;
@@ -329,41 +296,23 @@ abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
     }
 
     /***********************************************
-     * Toast *
+     * MenuButton Handle *
      **********************************************/
-    private Toast mToast;
 
-    /**
-     * Activity内で消し忘れがないよう，単一のToastインスタンスを使い回します．
-     * 
-     * @param text
-     * @param length
-     */
-    protected void showSingleToast(String text, int length) {
-        if (mToast != null) mToast.cancel();
-        mToast = Toast.makeText(self, text, length);
-        mToast.show();
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_MENU) {
+            onClickMenuButton();
+        }
+
+        return super.dispatchKeyEvent(event);
     }
 
     /**
-     * Activity内で消し忘れがないよう，単一のToastインスタンスを使い回します．
-     * 
-     * @param resId
-     * @param length
+     * Menuボタンが押されたときのアクションを定義します。 デフォルトでは空動作。必要に応じて上書きする。
      */
-    protected void showSingleToast(int resId, int length) {
-        if (mToast != null) mToast.cancel();
-        mToast = Toast.makeText(self, resId, length);
-        mToast.show();
-    }
-
-    /**
-     * 使い回している単一のToastインスタンスを破棄します．
-     * 
-     */
-    protected void removeSingleToast() {
-        if (mToast != null) mToast.cancel();
-        mToast = null;
+    @Deprecated
+    protected void onClickMenuButton() {
     }
 
 }

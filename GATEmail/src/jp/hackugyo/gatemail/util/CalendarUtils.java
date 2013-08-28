@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import jp.hackugyo.gatemail.CustomApplication;
 import junit.framework.Assert;
 import android.annotation.SuppressLint;
 
@@ -389,5 +390,30 @@ public final class CalendarUtils {
 
     public static boolean isToday(java.util.Date instance) {
         return isSameAs(Calendar.DATE, CalendarUtils.getInstance(instance), getInstance(true));
+    }
+
+    /**
+     * 端末の日付形式設定を反映した日付文字列を返します．<br>
+     * 日付形式設定は，端末のロケールを上書きできるため，必要な場合はこちらを使ってください．
+     * 
+     * @param instance
+     * @return yyyy/MM/ddなど
+     * @see <a href="http://qiita.com/items/508304558078203fe24b">参考ページ</a>
+     */
+    public static String getLocalizedDateString(java.util.Date instance) {
+        java.text.DateFormat format = android.text.format.DateFormat.getDateFormat(CustomApplication.getAppContext());
+        return format.format(instance);
+    }
+
+    /**
+     * 端末の日付形式設定を反映した日付文字列を返します．<br>
+     * 日付形式設定は，端末のロケールを上書きできるため，必要な場合はこちらを使ってください．
+     * 
+     * @param calendar
+     * @return yyyy/MM/ddなど
+     * @see <a href="http://qiita.com/items/508304558078203fe24b">参考ページ</a>
+     */
+    public static String getLocalizedDateString(Calendar calendar) {
+        return getLocalizedDateString(calendar.getTime());
     }
 }

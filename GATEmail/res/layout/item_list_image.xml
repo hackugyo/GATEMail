@@ -9,7 +9,7 @@
         android:layout_height="72dip"
         android:layout_margin="3dip"
         android:adjustViewBounds="true"
-        android:contentDescription="@string/Image.Description.Default"
+        android:contentDescription="@string/Image_Description_Default"
         android:scaleType="centerCrop" />
 
     <TextView

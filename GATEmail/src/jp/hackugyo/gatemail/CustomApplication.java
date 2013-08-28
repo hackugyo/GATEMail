@@ -6,6 +6,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import jp.hackugyo.gatemail.ui.view.ImageCacheManager;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
@@ -30,12 +31,15 @@ public class CustomApplication extends Application {
     private static Context _context;
     /** プリファレンス. */
     private static SharedPreferences _sharedPreferences;
+    /** 画像キャッシュ */
+    private static jp.hackugyo.gatemail.ui.view.ImageCacheManager sImageCacheManager;
 
     /**
      * どこにも出力しない PrintStream<br>
      * {@link Exception#printStackTrace()}などがLogCatに漏れないようにする
      */
     private final PrintStream mEmptyStream = new PrintStream(new OutputStream() {
+        @Override
         public void write(int oneByte) throws IOException {
             // do nothing
         }
@@ -154,6 +158,16 @@ public class CustomApplication extends Application {
         } catch (NameNotFoundException ignore) {
         }
         return versionName;
+    }
+
+    /**
+     * アプリ全体で利用する画像キャッシュを返します．
+     * この画像キャッシュはアプリアイコンだけを保存する想定のため，キーは，アプリのsearchKeyとします．
+     * 
+     * @return 画像キャッシュ（不変インスタンス）
+     */
+    public static ImageCacheManager getImageCacheManager() {
+        return sImageCacheManager;
     }
 
     /**

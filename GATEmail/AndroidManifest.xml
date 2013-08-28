@@ -27,10 +27,10 @@
         </activity>
         <activity
             android:name="jp.hackugyo.gatemail.ui.activity.WebViewActivity"
-            android:label="@string/Activity.Name.WebView" />
+            android:label="@string/Activity_Name_WebView" />
         <activity
             android:name="jp.hackugyo.gatemail.ui.activity.ImageListActivity"
-            android:label="@string/Activity.Name.ImageList" />
+            android:label="@string/Activity_Name_ImageList" />
     </application>
 
 </manifest>

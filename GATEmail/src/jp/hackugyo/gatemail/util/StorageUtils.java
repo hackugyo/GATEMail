@@ -9,11 +9,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import android.os.Build;
 import android.os.Environment;
 
 /**
- * SDカードのパスを取得します．
+ * SDカードのパスを返すメソッドです．
+ * 
  * 
  */
 public class StorageUtils {
@@ -39,16 +39,14 @@ public class StorageUtils {
      * マウント中の外部ストレージのパスを返します。
      */
     public static String getMountedExternalStoragePath() {
-        // P-06Dだけはルールに従っていなかったので，固定のパスとした．
-        if (StringUtils.isSame(Build.MODEL, "P-06D")) return "/mnt/sdcard/ext_sd";
-
+        String path = "";
         ArrayList<String> paths = getMountedStoragePathsWithoutInnerStorage();
 
-        if (paths != null && !paths.isEmpty()) {
-            return paths.get(0);
-        } else {
-            return "";
+        if (path != null && !paths.isEmpty()) {
+            path = paths.get(0);
         }
+
+        return path;
     }
 
     /***********************************************
@@ -80,6 +78,7 @@ public class StorageUtils {
                     // http://blog.tappli.com/article/44620525.html
                     path = path.replaceAll(":.*$", "");
 
+                    LogUtils.v(">>>>>>>>>>>> storage path : " + path);
                     if (!mountList.contains(path)) {
                         File dir = new File(path + "/");
                         if (dir.canRead()) mountList.add(path);
@@ -134,7 +133,22 @@ public class StorageUtils {
             mountList.remove(Environment.getExternalStorageDirectory().getPath());
         }
 
+        for (String path : mountList) {
+            LogUtils.v(">>>>>>>>>>>>>> mount Path : " + path);
+        }
+
         return mountList;
+    }
+
+    /**
+     * マウント中のストレージの一覧を取得します
+     */
+    @SuppressWarnings("unused")
+    private static ArrayList<String> getMountedStoragePaths() {
+        ArrayList<String> mountList = getStoragePaths();
+
+        // return trimUnmountStoragePaths(mountList);
+        return trimUnmountStoragePathsPlusUnRegisteredButMounted(mountList);
     }
 
     /**
@@ -143,11 +157,21 @@ public class StorageUtils {
     private static ArrayList<String> getMountedStoragePathsWithoutInnerStorage() {
         ArrayList<String> mountList = getStoragePathsWithoutInnerStorage();
 
+        // return trimUnmountStoragePaths(mountList);
         return trimUnmountStoragePathsPlusUnRegisteredButMounted(mountList);
     }
 
     @SuppressWarnings("unused")
-    @Deprecated
+    private static ArrayList<String> trimUnmountStoragePaths(ArrayList<String> storagePaths) {
+        for (int i = 0; i < storagePaths.size(); i++) {
+            if (!isMounted(storagePaths.get(i))) {
+                storagePaths.remove(i--);
+            }
+        }
+
+        return storagePaths;
+    }
+
     private static boolean isMounted(String path) {
         boolean isMounted = false;
 
@@ -228,14 +252,13 @@ public class StorageUtils {
      * 環境変数を使って取得した外部ストレージのパスを返します．
      */
     @SuppressWarnings("unused")
-    @Deprecated
     private static String getExternalStoragePathByEnviromentVariables() {
 
         String path = null;
         // MOTOROLA Photon ISW11M 対応
         path = System.getenv("EXTERNAL_ALT_STORAGE");
         if (path != null) return path;
-        // Samsung 対応
+        // Sumsung 対応
         path = System.getenv("EXTERNAL_STORAGE2");
         if (path != null) return path;
         // ISW13HT対応

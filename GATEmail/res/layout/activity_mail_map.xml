@@ -19,7 +19,7 @@
             android:gravity="center"
             android:paddingBottom="10dip"
             android:paddingTop="20dip"
-            android:text="@string/Activity.MailMap.Label.ActivityExample"
+            android:text="@string/Activity_MailMap_Label_ActivityExample"
             android:textSize="24sp" />
 
         <Button
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dip"
             android:onClick="onImageListClick"
-            android:text="@string/Activity.MailMap.Button.Text.ListViewGallery" />
+            android:text="@string/Activity_MailMap_Button_Text_ListViewGallery" />
     </LinearLayout>
 
 </ScrollView>

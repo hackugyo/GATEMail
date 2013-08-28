@@ -32,7 +32,7 @@ public final class MathUtils {
         int place = result.toString().length();
 
         if (place <= digits) return result;
-        BigDecimal d = BigDecimal.valueOf(result / Math.pow(10, place - digits));
+        BigDecimal d = new BigDecimal(result / Math.pow(10, place - digits));
         d = d.setScale(0, BigDecimal.ROUND_HALF_UP);
         result = (long) (d.intValue() * Math.pow(10, place - digits));
         return result;
