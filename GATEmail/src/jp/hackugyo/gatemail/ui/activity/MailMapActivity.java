@@ -4,14 +4,19 @@ import jp.hackugyo.gatemail.Defines;
 import jp.hackugyo.gatemail.Defines.Extra;
 import jp.hackugyo.gatemail.R;
 import jp.hackugyo.gatemail.ui.AbsFragmentActivity;
-import jp.hackugyo.gatemail.util.LogUtils;
+import jp.hackugyo.gatemail.ui.fragment.ErrorDialogFragment;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-public class MailMapActivity extends AbsFragmentActivity {
-    private final MailMapActivity  self = this;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 
+public class MailMapActivity extends AbsFragmentActivity {
+
+    private static final int REQUEST = 9000;
+    private final MailMapActivity self = this;
 
     /***********************************************
      * Life Cycle *
@@ -20,7 +25,7 @@ public class MailMapActivity extends AbsFragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mail_map);
-        LogUtils.i("on create");
+        checkGooglePlayServiceAvailable();
 
     }
 
@@ -37,6 +42,15 @@ public class MailMapActivity extends AbsFragmentActivity {
         setView();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent fromToDataIntent) {
+        super.onActivityResult(requestCode, resultCode, fromToDataIntent);
+        if (requestCode == REQUEST) {
+            if (resultCode == RESULT_OK) {
+                // TODO: API呼び出し処理
+            }
+        }
+    }
 
     /***********************************************
      * Set Views *
@@ -50,6 +64,7 @@ public class MailMapActivity extends AbsFragmentActivity {
      ***********************************************/
     /**
      * binded with Layout.xml file.
+     * 
      * @param view
      */
     public void onImageListClick(View view) {
@@ -63,5 +78,23 @@ public class MailMapActivity extends AbsFragmentActivity {
      ***********************************************/
     private String[] getImages() {
         return Defines.IMAGES;
+    }
+
+    /***********************************************
+     * Check GooglePlayServices *
+     ***********************************************/
+
+    private void checkGooglePlayServiceAvailable() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(self);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            // ErrorDialogはresultCodeに応じて違うものが返ってくる．
+            // resultCodeがConnectionResult.SUCCESS(0)だとnullしか返ってこないので注意
+            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode, self, REQUEST);
+            if (dialog != null) {
+                ErrorDialogFragment dialogFragment = new ErrorDialogFragment();
+                dialogFragment.setDialog(dialog);
+                dialogFragment.show(getSupportFragmentManager(), "error_dialog_fragment");
+            }
+        }
     }
 }
