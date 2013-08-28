@@ -28,6 +28,8 @@
             android:layout_margin="10dip"
             android:onClick="onImageListClick"
             android:text="@string/Activity_MailMap_Button_Text_ListViewGallery" />
+
+        <include layout="@layout/layout_map"/>
     </LinearLayout>
 
 </ScrollView>

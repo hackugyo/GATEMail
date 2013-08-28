@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/map"
+    android:layout_width="match_parent"
+    android:layout_height="400dp"
+    android:layout_margin="4dp"
+    class="com.google.android.gms.maps.SupportMapFragment"
+    map:cameraTargetLat="35.6472069"
+    map:cameraTargetLng="139.7013787"
+    map:cameraTilt="70"
+    map:cameraZoom="18" >
+    <!-- 他のレイアウトの子要素としてxmlを書くと，map要素にアクセスできないので，includeにして回避 -->
+    <!-- see http://potato777.hatenablog.com/entry/2013/03/22/004745 -->
+
+</fragment>
