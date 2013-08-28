@@ -315,4 +315,42 @@ abstract public class AbsFragmentActivity extends SherlockFragmentActivity {
     protected void onClickMenuButton() {
     }
 
+    /***********************************************
+     * Toast *
+     **********************************************/
+    private Toast mToast;
+
+    /**
+     * Activity内で消し忘れがないよう，単一のToastインスタンスを使い回します．
+     * 
+     * @param text
+     * @param length
+     */
+    protected void showSingleToast(String text, int length) {
+        if (mToast != null) mToast.cancel();
+        mToast = Toast.makeText(self, text, length);
+        mToast.show();
+    }
+
+    /**
+     * Activity内で消し忘れがないよう，単一のToastインスタンスを使い回します．
+     * 
+     * @param resId
+     * @param length
+     */
+    protected void showSingleToast(int resId, int length) {
+        if (mToast != null) mToast.cancel();
+        mToast = Toast.makeText(self, resId, length);
+        mToast.show();
+    }
+
+    /**
+     * 使い回している単一のToastインスタンスを破棄します．
+     * 
+     */
+    protected void removeSingleToast() {
+        if (mToast != null) mToast.cancel();
+        mToast = null;
+    }
+
 }
