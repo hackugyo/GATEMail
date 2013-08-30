@@ -1,13 +1,5 @@
 package jp.hackugyo.gatemail.ui.activity;
 
-import java.util.ArrayList;
-
-import jp.hackugyo.gatemail.Defines;
-import jp.hackugyo.gatemail.R;
-import jp.hackugyo.gatemail.service.RecognitionIntentService;
-import jp.hackugyo.gatemail.ui.AbsFragmentActivity;
-import jp.hackugyo.gatemail.ui.fragment.ErrorDialogFragment;
-import jp.hackugyo.gatemail.util.LogUtils;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -24,6 +16,15 @@ import com.google.android.gms.location.ActivityRecognitionClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListener;
+
+import jp.hackugyo.gatemail.Defines;
+import jp.hackugyo.gatemail.R;
+import jp.hackugyo.gatemail.service.RecognitionIntentService;
+import jp.hackugyo.gatemail.ui.AbsFragmentActivity;
+import jp.hackugyo.gatemail.ui.fragment.ErrorDialogFragment;
+import jp.hackugyo.gatemail.util.LogUtils;
+
+import java.util.ArrayList;
 
 public class MailMapActivity extends AbsFragmentActivity {
 
@@ -105,7 +106,9 @@ public class MailMapActivity extends AbsFragmentActivity {
      * @param view
      */
     public void onImageListClick(View view) {
-        showCurrentLocation();
+        // showCurrentLocation();
+        Intent intent = new Intent(self, MapOfTheEarthActivity.class);
+        startActivity(intent);
     }
 
     /***********************************************

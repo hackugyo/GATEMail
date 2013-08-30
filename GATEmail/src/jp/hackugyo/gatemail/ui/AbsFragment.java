@@ -1,10 +1,5 @@
 package jp.hackugyo.gatemail.ui;
 
-import jp.hackugyo.gatemail.CustomApplication;
-import jp.hackugyo.gatemail.R;
-import jp.hackugyo.gatemail.ui.fragment.ProgressDialogFragment;
-import jp.hackugyo.gatemail.util.FragmentUtils;
-import jp.hackugyo.gatemail.util.LogUtils;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,6 +8,12 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+
+import jp.hackugyo.gatemail.CustomApplication;
+import jp.hackugyo.gatemail.R;
+import jp.hackugyo.gatemail.ui.fragment.ProgressDialogFragment;
+import jp.hackugyo.gatemail.util.FragmentUtils;
+import jp.hackugyo.gatemail.util.LogUtils;
 
 public class AbsFragment extends Fragment {
     private final AbsFragment self = this;
@@ -63,7 +64,7 @@ public class AbsFragment extends Fragment {
     }
 
     /**
-     * {@link AbsBaseActivity#isShowingSameDialogFragment(String)}と同様
+     * {@link AbsFragmentActivity#isShowingSameDialogFragment(String)}と同様
      * 
      * @param fragmentTag
      */

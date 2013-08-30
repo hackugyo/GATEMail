@@ -7,6 +7,7 @@
     <string name="Dialog_Button_Label_Negative">NG</string>
     
     <!-- Activity titles -->
+    <string name="Activity_Name_MapOfTheEarth">いま飛んでいるメール</string>
     <string name="Activity_Name_WebView">内部ブラウザ</string>
     <string name="Activity_Name_ImageList">Image List Example</string>
     
