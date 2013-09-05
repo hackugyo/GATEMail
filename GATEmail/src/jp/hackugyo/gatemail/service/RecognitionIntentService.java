@@ -1,7 +1,5 @@
 package jp.hackugyo.gatemail.service;
 
-import jp.hackugyo.gatemail.R;
-import jp.hackugyo.gatemail.ui.activity.MailMapActivity;
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,6 +11,9 @@ import android.support.v4.app.NotificationCompat;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+
+import jp.hackugyo.gatemail.R;
+import jp.hackugyo.gatemail.ui.activity.MailMapActivity;
 
 public class RecognitionIntentService extends IntentService {
 

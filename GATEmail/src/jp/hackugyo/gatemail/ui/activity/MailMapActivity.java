@@ -46,8 +46,12 @@ public class MailMapActivity extends AbsFragmentActivity {
         setContentView(R.layout.activity_mail_map);
         checkGooglePlayServiceAvailable();
 
-        mLocationClient = new LocationClient(self, getLocationClientConnectionCallbacks(), getOnConnectionFailedListener());
-        mActivityRecognitionClient = new ActivityRecognitionClient(self, getActivityRecognitionClientConnectionCallbacks(), getOnConnectionFailedListener());
+        mLocationClient = new LocationClient(self, //
+                getLocationClientConnectionCallbacks(), //
+                getOnConnectionFailedListener());
+        mActivityRecognitionClient = new ActivityRecognitionClient(self, //
+                getActivityRecognitionClientConnectionCallbacks(), //
+                getOnConnectionFailedListener());
     }
 
     @Override
@@ -61,8 +65,13 @@ public class MailMapActivity extends AbsFragmentActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         int transitionType = LocationClient.getGeofenceTransition(intent);
-        showSingleToast(transitionType == Geofence.GEOFENCE_TRANSITION_ENTER ? "in!" : "out", Toast.LENGTH_LONG);
-        LogUtils.i(transitionType == Geofence.GEOFENCE_TRANSITION_ENTER ? "in!" : "out");
+        if (transitionType == Geofence.GEOFENCE_TRANSITION_ENTER) {
+            showSingleToast("in!", Toast.LENGTH_LONG);
+            LogUtils.i("in!");
+        } else if (transitionType == Geofence.GEOFENCE_TRANSITION_EXIT) {
+            showSingleToast("out!", Toast.LENGTH_LONG);
+            LogUtils.i("out!");
+        }
     }
 
     @Override
@@ -70,7 +79,7 @@ public class MailMapActivity extends AbsFragmentActivity {
         super.onStart();
         setView();
         if (mLocationClient != null) mLocationClient.connect();
-        mActivityRecognitionClient.connect();
+        if (mActivityRecognitionClient != null) mActivityRecognitionClient.connect();
     }
 
     @Override
@@ -86,8 +95,18 @@ public class MailMapActivity extends AbsFragmentActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (mLocationClient != null) mLocationClient.disconnect();
-        mActivityRecognitionClient.disconnect();
+        if (mLocationClient != null) {
+            Intent intent = new Intent(self, MailMapActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(self, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            mLocationClient.removeLocationUpdates(pendingIntent);
+            mLocationClient.disconnect();
+        }
+        if (mActivityRecognitionClient != null) {
+            Intent intent = new Intent(self.getApplicationContext(), RecognitionIntentService.class);
+            PendingIntent pendingIntent = PendingIntent.getService(self, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            mActivityRecognitionClient.removeActivityUpdates(pendingIntent);
+            mActivityRecognitionClient.disconnect();
+        }
     }
 
     /***********************************************
@@ -106,9 +125,9 @@ public class MailMapActivity extends AbsFragmentActivity {
      * @param view
      */
     public void onImageListClick(View view) {
-        // showCurrentLocation();
+        showCurrentLocation();
         Intent intent = new Intent(self, MapOfTheEarthActivity.class);
-        startActivity(intent);
+        // startActivity(intent);
     }
 
     /***********************************************
@@ -122,7 +141,7 @@ public class MailMapActivity extends AbsFragmentActivity {
      * Check GooglePlayServices *
      ***********************************************/
 
-    private void checkGooglePlayServiceAvailable() {
+    private boolean checkGooglePlayServiceAvailable() {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(self);
         if (resultCode != ConnectionResult.SUCCESS) {
             // ErrorDialogはresultCodeに応じて違うものが返ってくる．
@@ -133,7 +152,9 @@ public class MailMapActivity extends AbsFragmentActivity {
                 dialogFragment.setDialog(dialog);
                 dialogFragment.show(getSupportFragmentManager(), "error_dialog_fragment");
             }
+            return false;
         }
+        return true;
     }
 
     /***********************************************
@@ -141,7 +162,7 @@ public class MailMapActivity extends AbsFragmentActivity {
      ***********************************************/
 
     private void showCurrentLocation() {
-        if (mLocationClient.isConnected()) {
+        if (mLocationClient != null && mLocationClient.isConnected()) {
             Location location = mLocationClient.getLastLocation();
             showSingleToast(location.toString(), Toast.LENGTH_LONG);
         } else {
@@ -161,6 +182,7 @@ public class MailMapActivity extends AbsFragmentActivity {
                 @Override
                 public void onDisconnected() {
                     showSingleToast("onDIisconnected LocationClient", Toast.LENGTH_LONG);
+
                 }
             };
         }
@@ -184,6 +206,7 @@ public class MailMapActivity extends AbsFragmentActivity {
      * GeoFencing *
      ***********************************************/
     private void addGeofence() {
+        if (mLocationClient == null) return;
         // Geofence の作成
         // 緯度
         double latitude = 35.6472069;
@@ -237,7 +260,7 @@ public class MailMapActivity extends AbsFragmentActivity {
 
                 @Override
                 public void onDisconnected() {
-                    showSingleToast("onDIisconnected ActivityRecognitionClient", Toast.LENGTH_LONG);
+                    showSingleToast("onDisconnected ActivityRecognitionClient", Toast.LENGTH_LONG);
                 }
             };
         }
@@ -245,8 +268,9 @@ public class MailMapActivity extends AbsFragmentActivity {
     }
 
     private void getActivityRecognition() {
-        Intent intent = new Intent(self, RecognitionIntentService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(self, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        LogUtils.i("start recoginition...");
+        Intent intent = new Intent(getApplicationContext(), RecognitionIntentService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         mActivityRecognitionClient.requestActivityUpdates(1000, pendingIntent);
     }
 }

@@ -20,9 +20,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- 古いサンプルには書いてあるが，Google Play Services 3.1.59以降は不要になった uses-permission android:name="jp.hackugyo.gatemail.permission.MAPS_RECEIVE" -->
-    <uses-feature 
+    <uses-feature
         android:glEsVersion="0x00020000"
-        android:required="true"/>
+        android:required="true" />
 
     <application
         android:name="jp.hackugyo.gatemail.CustomApplication"
@@ -36,6 +36,7 @@
         <!-- service -->
         <service
             android:name="jp.hackugyo.gatemail.service.RecognitionIntentService"
+            android:label="@string/app_name"
             android:exported="false" >
         </service>
         <!-- activity -->
@@ -51,7 +52,7 @@
         </activity>
         <activity
             android:name="jp.hackugyo.gatemail.ui.activity.MapOfTheEarthActivity"
-            android:label="@string/Activity_Name_MapOfTheEarth"/>
+            android:label="@string/Activity_Name_MapOfTheEarth" />
         <activity
             android:name="jp.hackugyo.gatemail.ui.activity.WebViewActivity"
             android:label="@string/Activity_Name_WebView" />
